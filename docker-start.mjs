@@ -1,4 +1,5 @@
 import { spawnSync } from "node:child_process";
+import { existsSync } from "node:fs";
 
 function firstEnv(names) {
   for (const name of names) {
@@ -41,7 +42,8 @@ function buildDatabaseUrl() {
 function run(command, args, env) {
   const result = spawnSync(command, args, {
     stdio: "inherit",
-    env
+    env,
+    shell: process.platform === "win32"
   });
 
   if (result.error) {
@@ -60,7 +62,9 @@ const env = {
   ...process.env,
   DATABASE_URL: databaseUrl
 };
+const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+const schemaPath = existsSync("prisma/schema.prisma") ? "prisma/schema.prisma" : "backend/prisma/schema.prisma";
 
 console.log(`Using DATABASE_URL: ${safeDatabaseUrl}`);
-run("npx", ["prisma", "migrate", "deploy"], env);
+run(npxCommand, ["prisma", "migrate", "deploy", "--schema", schemaPath], env);
 run("node", ["dist/server.js"], env);
