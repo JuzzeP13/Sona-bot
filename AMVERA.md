@@ -9,7 +9,7 @@ This project is prepared for Amvera as one Docker application:
 ## Files
 
 - `Dockerfile` builds frontend and backend into one runtime container.
-- `amvera.yml` tells Amvera that the app listens on port `3000`.
+- `amvera.yaml` tells Amvera that the app listens on port `3000`.
 - `.env.amvera.example` lists the production variables to add in Amvera.
 
 ## Amvera setup

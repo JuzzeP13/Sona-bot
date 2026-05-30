@@ -42,4 +42,4 @@ COPY --from=frontend-build /frontend/dist ./public
 COPY backend/assets ./assets
 
 EXPOSE 3000
-CMD ["sh", "-c", "npx prisma migrate deploy && npm run start"]
+CMD ["sh", "-c", "if [ -z \"$DATABASE_URL\" ]; then echo \"DATABASE_URL is required. Add it in Amvera Variables.\"; exit 1; fi; npx prisma migrate deploy && npm run start"]
