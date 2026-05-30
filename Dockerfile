@@ -16,6 +16,7 @@ WORKDIR /backend
 COPY backend/package*.json ./
 RUN npm ci
 COPY backend/prisma ./prisma
+ENV DATABASE_URL=postgresql://user:password@localhost:5432/db?schema=public
 RUN npx prisma generate
 COPY backend/tsconfig.json ./
 COPY backend/src ./src
