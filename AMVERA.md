@@ -28,6 +28,16 @@ This project is prepared for Amvera as one Docker application:
    postgresql://<db_user>:<db_password>@<internal_postgres_host>:5432/<db_name>?schema=public
    ```
 
+   If you prefer separate database variables, the Docker startup script can also build the URL from:
+
+   ```text
+   POSTGRES_HOST
+   POSTGRES_DB
+   POSTGRES_USER
+   POSTGRES_PASSWORD
+   POSTGRES_PORT
+   ```
+
 5. Set the public domain in both:
 
    ```text

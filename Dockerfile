@@ -34,12 +34,15 @@ ENV PORT=3000
 ENV NODE_OPTIONS=--dns-result-order=ipv4first
 
 COPY backend/package*.json ./
-RUN npm ci --omit=dev && npm cache clean --force
+COPY --from=backend-build /backend/prisma ./prisma
+RUN DATABASE_URL=postgresql://user:password@localhost:5432/db?schema=public npm ci --omit=dev \
+  && DATABASE_URL=postgresql://user:password@localhost:5432/db?schema=public npx prisma generate \
+  && npm cache clean --force
 
 COPY --from=backend-build /backend/dist ./dist
-COPY --from=backend-build /backend/prisma ./prisma
 COPY --from=frontend-build /frontend/dist ./public
 COPY backend/assets ./assets
+COPY docker-start.mjs ./docker-start.mjs
 
 EXPOSE 3000
-CMD ["sh", "-c", "if [ -z \"$DATABASE_URL\" ]; then echo \"DATABASE_URL is required. Add it in Amvera Variables.\"; exit 1; fi; npx prisma migrate deploy && npm run start"]
+CMD ["node", "docker-start.mjs"]
