@@ -3,10 +3,8 @@ meta:
   toolchain:
     name: docker
 build:
+  dockerfile: Dockerfile
   skip: false
-  additionalCommands: null
-  artifacts:
-    "*": /
 run:
   command: sh -c 'if [ -z "$DATABASE_URL" ]; then echo "DATABASE_URL is required. Add it in Amvera Variables."; exit 1; fi; npx prisma migrate deploy && npm run start'
   persistenceMount: /data
