@@ -13,7 +13,28 @@ require_env() {
   fi
 }
 
-require_env DATABASE_URL
+configure_database_url() {
+  if [ -n "${DATABASE_URL:-}" ]; then
+    echo "Using DATABASE_URL from environment."
+    return
+  fi
+
+  if [ -n "${POSTGRES_HOST:-}" ] \
+    && [ -n "${POSTGRES_DB:-}" ] \
+    && [ -n "${POSTGRES_USER:-}" ] \
+    && [ -n "${POSTGRES_PASSWORD:-}" ]; then
+    postgres_port="${POSTGRES_PORT:-5432}"
+    DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${postgres_port}/${POSTGRES_DB}?schema=public"
+    export DATABASE_URL
+    echo "DATABASE_URL assembled from POSTGRES_* variables: host=${POSTGRES_HOST}, port=${postgres_port}, db=${POSTGRES_DB}, user=${POSTGRES_USER}."
+    return
+  fi
+
+  echo "DATABASE_URL is required, or provide POSTGRES_HOST, POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD." >&2
+  missing=1
+}
+
+configure_database_url
 require_env JWT_SECRET
 require_env ADMIN_NAME
 require_env ADMIN_EMAIL
