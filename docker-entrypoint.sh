@@ -44,8 +44,7 @@ if [ "${TELEGRAM_ENABLED:-false}" = "true" ]; then
   require_env TELEGRAM_BOT_TOKEN
 
   if [ -z "${TELEGRAM_LEAD_CHANNEL_ID:-}" ] && [ -z "${TELEGRAM_ADMIN_CHAT_ID:-}" ]; then
-    echo "Missing required environment variable: TELEGRAM_LEAD_CHANNEL_ID or TELEGRAM_ADMIN_CHAT_ID" >&2
-    missing=1
+    echo "Telegram notifications are disabled: set TELEGRAM_LEAD_CHANNEL_ID or TELEGRAM_ADMIN_CHAT_ID to receive new lead alerts." >&2
   fi
 fi
 
