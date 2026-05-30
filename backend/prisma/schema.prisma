@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  manager
+}
+
+enum SofaModel {
+  ELVIS_B
+  MARK
+  BERGEN
+  PAULA
+  RIO_KIDS
+  MALTA
+  VICTORIA
+  MALYSH
+  DUBLIN
+  TOMAS
+  BRIGHTON
+  GUDZON
+  NIZZA
+  MILAN
+}
+
+enum LeadStatus {
+  new
+  in_work
+  contacted
+  waiting_client
+  success
+  failed
+  archived
+}
+
+enum TelegramSegment {
+  base
+  standard
+  new
+  all
+}
+
+model User {
+  id             String            @id @default(cuid())
+  name           String
+  email          String            @unique
+  passwordHash   String
+  role           UserRole          @default(manager)
+  isActive       Boolean           @default(true)
+  telegramChatId String?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  assignedLeads  SofaLead[]        @relation("AssignedManager")
+  activities     LeadActivityLog[]
+
+  @@index([role, isActive])
+}
+
+model TelegramUserSession {
+  id             String          @id @default(cuid())
+  telegramUserId String          @unique
+  username       String?
+  firstName      String?
+  segment        TelegramSegment @default(all)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([segment])
+}
+
+model SofaLead {
+  id                String            @id @default(cuid())
+  selectedModel     SofaModel
+  phone             String
+  normalizedPhone   String
+  status            LeadStatus        @default(new)
+  assignedManagerId String?
+  source            String            @default("sofa-bot")
+  clientName        String?
+  adminComment      String?
+  managerComment    String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  assignedManager   User?             @relation("AssignedManager", fields: [assignedManagerId], references: [id], onDelete: SetNull)
+  activities        LeadActivityLog[]
+
+  @@index([assignedManagerId])
+  @@index([createdAt])
+  @@index([normalizedPhone])
+  @@index([selectedModel])
+  @@index([status])
+}
+
+model LeadActivityLog {
+  id        String   @id @default(cuid())
+  leadId    String
+  userId    String?
+  action    String
+  oldValue  String?
+  newValue  String?
+  createdAt DateTime @default(now())
+  lead      SofaLead @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([leadId, createdAt])
+  @@index([userId])
+}
