@@ -29,7 +29,7 @@ RUN npm run build
 FROM node:22-bookworm-slim AS runner
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates openssl postgresql \
+  && apt-get install -y --no-install-recommends ca-certificates openssl \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -38,7 +38,6 @@ ENV NODE_ENV=production
 ENV PORT=3000
 ENV FRONTEND_DIST_PATH=/app/public
 ENV NODE_OPTIONS=--dns-result-order=ipv4first
-ENV EMBEDDED_POSTGRES_ENABLED=true
 
 COPY backend/package*.json ./
 COPY backend/prisma ./prisma
