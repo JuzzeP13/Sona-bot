@@ -45,13 +45,15 @@ start_embedded_postgres() {
   fi
 
   PGDATA="${PGDATA:-/data/postgres}"
+  POSTGRES_RUN_DIR="${POSTGRES_RUN_DIR:-/var/run/postgresql}"
   POSTGRES_DB="${POSTGRES_DB:-sona_bot}"
   POSTGRES_USER="${POSTGRES_USER:-sona_user}"
   POSTGRES_PASSWORD="${POSTGRES_PASSWORD:-sona_local_password}"
   POSTGRES_PORT="${POSTGRES_PORT:-5432}"
-  export PGDATA POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD POSTGRES_PORT
+  export PGDATA POSTGRES_RUN_DIR POSTGRES_DB POSTGRES_USER POSTGRES_PASSWORD POSTGRES_PORT
 
   install -d -m 700 -o postgres -g postgres "$PGDATA"
+  install -d -m 775 -o postgres -g postgres "$POSTGRES_RUN_DIR"
 
   if [ ! -s "${PGDATA}/PG_VERSION" ]; then
     echo "Initializing embedded PostgreSQL in ${PGDATA}."
@@ -59,13 +61,14 @@ start_embedded_postgres() {
     {
       echo "listen_addresses = '127.0.0.1'"
       echo "port = ${POSTGRES_PORT}"
+      echo "unix_socket_directories = '${POSTGRES_RUN_DIR}'"
     } >> "${PGDATA}/postgresql.conf"
   else
     echo "Using existing embedded PostgreSQL data directory: ${PGDATA}."
   fi
 
   echo "Starting embedded PostgreSQL on 127.0.0.1:${POSTGRES_PORT}."
-  su postgres -c "\"${POSTGRES_BIN}/pg_ctl\" -D \"${PGDATA}\" -o \"-c listen_addresses=127.0.0.1 -p ${POSTGRES_PORT}\" -w start"
+  su postgres -c "\"${POSTGRES_BIN}/pg_ctl\" -D \"${PGDATA}\" -o \"-c listen_addresses=127.0.0.1 -c unix_socket_directories=${POSTGRES_RUN_DIR} -p ${POSTGRES_PORT}\" -w start"
 
   db_ident="$(escape_sql_identifier "$POSTGRES_DB")"
   db_lit="$(escape_sql_literal "$POSTGRES_DB")"
